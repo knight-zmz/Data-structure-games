@@ -1,12 +1,27 @@
-# import critical modules - random for board generation, copy for being able to restart, pygame for framework
+"""
+水排序小游戏（Water Sort）
+
+此脚本使用 `pygame` 框架实现一个颜色排序的益智游戏。
+玩家通过点击不同试管中的彩色球，将相同颜色的球全部集中在同一试管中。
+当所有非空试管都只包含一种颜色且装满时，游戏胜利。
+
+主要功能：
+- 随机生成带有彩色球的试管棋盘。
+- 支持鼠标选择和移动球体。
+- 检查玩家是否成功完成排序。
+
+作者原注释为英文，为方便中文读者理解，在此添加详细中文注释。
+"""
+
+# 导入关键模块：random 用于棋盘生成，copy 用于重开时复制状态，pygame 为游戏框架
 import copy
 import random
 import pygame
 
-# initialize pygame
+# 初始化 pygame
 pygame.init()
 
-# initialize game variables
+# 初始化游戏变量
 WIDTH = 500
 HEIGHT = 550
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
@@ -28,7 +43,7 @@ win = False
 
 
 
-# select a number of tubes and pick random colors upon new game setup
+# 在新游戏开始时随机生成试管数量并随机分配颜色
 def generate_start():
     tubes_number = random.randint(10, 14)
     tubes_colors = []
@@ -48,7 +63,7 @@ def generate_start():
     return tubes_number, tubes_colors
 
 
-# draw all tubes and colors on screen, as well as indicating what tube was selected
+# 绘制所有试管及其中的颜色，同时标识当前被选中的试管
 def draw_tubes(tubes_num, tube_cols):
     tube_boxes = []
     if tubes_num % 2 == 0:
@@ -97,8 +112,7 @@ def draw_tubes(tubes_num, tube_cols):
     return tube_boxes
 
 
-# determine the top color of the selected tube and destination tube,
-# as well as how long a chain of that color to move
+# 根据当前选择的试管和目标试管，计算可以移动的颜色及数量
 def calc_move(colors, selected_rect, destination):
     chain = True
     color_on_top = 100
@@ -127,7 +141,7 @@ def calc_move(colors, selected_rect, destination):
     return colors
 
 
-# check if every tube with colors is 4 long and all the same color. That's how we win
+# 检查是否所有非空试管都被同一颜色填满四个球，满足则胜利
 def check_victory(colors):
     won = True
     for i in range(len(colors)):
@@ -142,22 +156,22 @@ def check_victory(colors):
     return won
 
 
-# main game loop
+# 主游戏循环
 run = True
 while run:
     screen.fill('black')
     timer.tick(fps)
-    # generate game board on new game, make a copy of the colors in case of restart
+    # 当开始新游戏时生成棋盘，并复制初始颜色以便重新开始
     if new_game:
         tubes, tube_colors = generate_start()
         initial_colors = copy.deepcopy(tube_colors)
         new_game = False
-    # draw tubes every cycle
+    # 每帧绘制所有试管
     else:
         tube_rects = draw_tubes(tubes, tube_colors)
-    # check for victory every cycle
+    # 每帧检查是否已经胜利
     win = check_victory(tube_colors)
-    # event handling - Quit button exits, clicks select tubes, enter and space for restart and new board
+    # 事件处理：退出、点击选择试管、空格重玩、回车生成新棋盘
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -179,13 +193,15 @@ while run:
                         tube_colors = calc_move(tube_colors, select_rect, dest_rect)
                         selected = False
                         select_rect = 100
-    # draw 'victory' text when winning in middle, always show restart and new board text at top
+    # 如果胜利则在屏幕中间显示提示；顶部始终显示重玩和新棋盘提示
     if win:
         victory_text = font.render('You Won! Press Enter for a new board!', True, 'white')
         screen.blit(victory_text, (30, 265))
     restart_text = font.render('Stuck? Space-Restart, Enter-New Board!', True, 'white')
     screen.blit(restart_text, (10, 10))
 
-    # display all drawn items on screen, exit pygame if run == False
+    # 刷新屏幕显示所有内容；若 run 为 False 则退出 pygame
     pygame.display.flip()
+
+# 退出 pygame
 pygame.quit()
